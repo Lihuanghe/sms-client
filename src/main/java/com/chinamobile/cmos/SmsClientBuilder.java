@@ -166,8 +166,7 @@ public class SmsClientBuilder {
 				return "AddResponseSenderHandler";
 			}
 		};
-		AbstractBusinessHandler receiverHandler =new AbstractBusinessHandler() {
-
+		AbstractBusinessHandler receiverHandlerAdder =new AbstractBusinessHandler() {
 			@Override
 			public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
 				ctx.pipeline().addLast(new AbstractBusinessHandler() {
@@ -192,7 +191,7 @@ public class SmsClientBuilder {
 				return "AddReceiverHandler";
 			}
 		};
-		innerEntity.getBusinessHandlerSet().add(receiverHandler);
+		innerEntity.getBusinessHandlerSet().add(receiverHandlerAdder);
 		innerEntity.getBusinessHandlerSet().add(responseHandler);
 		return innerEntity;
 	}
