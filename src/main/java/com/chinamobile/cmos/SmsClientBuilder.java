@@ -175,7 +175,9 @@ public class SmsClientBuilder {
 						try {
 							if(receiver!=null)
 								receiver.receive((BaseMessage) msg);
-						}catch(Exception e) {}
+						}catch(Exception e) {
+							logger.warn("{}",msg);
+						}
 					}
 
 					@Override

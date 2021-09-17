@@ -43,5 +43,14 @@ public class SmsClient {
 			pool.returnObject(client);
 		}
 	}
+
+	public boolean open()  throws Exception{
+		InnerSmsClient  client = pool.borrowObject();
+		try {
+			return  client.open();
+		}finally {
+			pool.returnObject(client);
+		}
+	}
 	
 }
