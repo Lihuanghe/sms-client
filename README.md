@@ -4,6 +4,10 @@
 群名称：cmppGate短信
 <br/>群   号：770738500
 
+# 一个基于[SMSGate框架](https://github.com/Lihuanghe/SMSGate) 的纯发送短信客户端库，使用简单
+
+
+
 # How To Use
 
 - `如何发送短信？`
@@ -82,3 +86,9 @@
 	client.setProxy("socks5://username:password@ipaddress:port");  //socks5代理
 
 ```
+
+# TODO
+
+
+
+
