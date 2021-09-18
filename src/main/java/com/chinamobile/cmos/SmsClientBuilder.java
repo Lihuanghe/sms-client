@@ -48,8 +48,11 @@ public class SmsClientBuilder {
 
 		int maxChannel = entity.getMaxChannels();
 
-		if (maxChannel > 0)
+		if (maxChannel > 0) {
 			config.setMaxTotal(maxChannel);
+			config.setMaxIdle(maxChannel);
+		}
+			
 
 		pool = new GenericObjectPool<InnerSmsClient>(new BasePooledObjectFactory<InnerSmsClient>() {
 
