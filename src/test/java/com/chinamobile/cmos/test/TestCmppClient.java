@@ -64,7 +64,7 @@ public class TestCmppClient {
 					msg.setDestterminalId(String.valueOf(System.nanoTime()));
 					msg.setSrcId(String.valueOf(System.nanoTime()));
 					msg.setLinkID("0000");
-					msg.setMsgContent(new SmsTextMessage("老师好，CmppSubmitRequestMessage msg = new CmppSubmitRequestMessage();接工信部投诉",new SmsDcs((byte)8,70)));
+					msg.setMsgContent(new SmsTextMessage("老师好，CmppSubmitRequestMessage msg = new CmppSubmitRequestMessage();接工信部投诉",new SmsDcs((byte)8)));
 					msg.setRegisteredDelivery((short) 0);
 					msg.setServiceId("10086");
 					try {

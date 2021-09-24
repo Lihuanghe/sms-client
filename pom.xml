@@ -8,6 +8,14 @@
 	<version>0.0.1</version>
 	<name>sms-client</name>
 	<url>http://maven.apache.org</url>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.test.skip>true</maven.test.skip>
+		<java_source_version>1.7</java_source_version>
+		<java_target_version>1.7</java_target_version>
+		<maven.compiler.source>1.7</maven.compiler.source>
+		<maven.compiler.target>1.7</maven.compiler.target>
+	</properties>	
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
