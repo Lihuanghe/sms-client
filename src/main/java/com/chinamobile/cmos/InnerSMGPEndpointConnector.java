@@ -49,6 +49,7 @@ class InnerSMGPEndpointConnector extends SMGPClientEndpointConnector   implement
 				if(!loginResponseFuture.isDone())
 					loginResponseFuture.tryFailure(new IOException("login Failed.") );
 				atomicReference.set(null);
+				super.channelInactive(ctx);
 			}
 			protected  int validServermsg(Object message) {
 				int status = super.validServermsg(message);

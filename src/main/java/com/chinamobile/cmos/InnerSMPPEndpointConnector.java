@@ -46,9 +46,11 @@ class InnerSMPPEndpointConnector extends SMPPClientEndpointConnector   implement
 		SMPPSessionLoginManager handler =(SMPPSessionLoginManager) pipeline.get("sessionLoginManager");
 		pipeline.replace(handler, "sessionLoginManager", new SMPPSessionLoginManager(getEndpointEntity()) {
 			public void channelInactive(ChannelHandlerContext ctx) throws Exception{
+				
 				if(!loginResponseFuture.isDone())
 					loginResponseFuture.tryFailure(new IOException("login Failed.") );
 				atomicReference.set(null);
+				super.channelInactive(ctx);
 			}
 			protected  int validServermsg(Object message) {
 				int status = super.validServermsg(message);

@@ -31,18 +31,27 @@ public class SmsClientBuilder {
 	private GenericObjectPool<InnerSmsClient> pool;
 	private GenericObjectPoolConfig config;
 	private MessageReceiver receiver;
-	boolean hasBuild = false;
+	private boolean hasBuild = false;
+	private boolean keepAllIdleConnection = false;
 
 	public SmsClient build() {
 		if (hasBuild)
 			return client;
 		if (config == null) {
 			config = new GenericObjectPoolConfig();
+			//连接空闲超过此时间，并且空闲个数大于最大空闲连接数，连接收回
 			config.setSoftMinEvictableIdleTimeMillis(30000);
-			config.setMinEvictableIdleTimeMillis(30000);
-			config.setTimeBetweenEvictionRunsMillis(60000);
+			config.setMinIdle(2); //至少保留1个连接
 		}
-
+		
+		//这个配置影响断点续连 ，连接空闲超过此时间强制关闭回收连接
+		config.setMinEvictableIdleTimeMillis(-1); 
+		
+		//打开个这配置，相当于开启断连检查
+		config.setTestWhileIdle(true);
+		//这个时间影响断点续连的检查时间，时长越长发现断连越晚
+		config.setTimeBetweenEvictionRunsMillis(5000);  
+		
 		if (entity == null || StringUtils.isBlank(entity.getId()))
 			return null;
 
@@ -51,6 +60,10 @@ public class SmsClientBuilder {
 		if (maxChannel > 0) {
 			config.setMaxTotal(maxChannel);
 			config.setMaxIdle(maxChannel);
+			if(keepAllIdleConnection) {
+				//保留所有空闲连接
+				config.setMinIdle(maxChannel); 
+			}
 		}
 			
 
@@ -97,6 +110,11 @@ public class SmsClientBuilder {
 	public SmsClientBuilder entity(EndpointEntity entity) {
 
 		this.entity = entity;
+		return this;
+	}
+	
+	public SmsClientBuilder keepAllIdleConnection() {
+		this.keepAllIdleConnection = true;
 		return this;
 	}
 

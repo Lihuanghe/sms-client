@@ -22,7 +22,7 @@ import io.netty.util.concurrent.Promise;
 class InnerSmsClient {
 	private static final Logger logger = LoggerFactory.getLogger(InnerSmsClient.class);
 	private EndpointEntity entity;
-	private boolean connected = false;
+	private volatile boolean connected = false;
 	private AbstractClientEndpointConnector connector;
 
 	InnerSmsClient(EndpointEntity entity) {
@@ -102,9 +102,9 @@ class InnerSmsClient {
 
 	public boolean open() throws Exception {
 
-		if (connected)
-			return connected;
-		ChannelFuture future = connector.open();
+		if (isConnected())
+			return true;
+		connector.open();
 		try {
 			connected = (0 == ((LoginResponseWaiter)connector).responseResult());
 			return connected;
@@ -121,7 +121,8 @@ class InnerSmsClient {
 	}
 
 	public boolean isConnected() {
-		return connected;
+		 connected = ((LoginResponseWaiter)connector).session() != null;
+		 return connected;
 	}
 
 	@Override
