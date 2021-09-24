@@ -28,8 +28,8 @@ public class SmsClient {
 		InnerSmsClient  client = pool.borrowObject();
 		try {
 			Promise<BaseMessage> promise = client.send(msg);
-			promise.awaitUninterruptibly();
-			return promise.get(timeOut,TimeUnit.MILLISECONDS);
+			promise.awaitUninterruptibly(timeOut,TimeUnit.MILLISECONDS);
+			return promise.get();
 		}finally {
 			pool.returnObject(client);
 		}
