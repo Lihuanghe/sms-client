@@ -33,7 +33,9 @@
 		client.setGroupName("test");
 		client.setUserName("901783");  //企业代码
 		client.setPassword("ICP001");  //密码
-
+//	client.setProxy("http://username:password@ipaddress:port");  //http代理
+//	client.setProxy("socks4://username:password@ipaddress:port");  //socks4代理
+//	client.setProxy("socks5://username:password@ipaddress:port");  //socks5代理
 		client.setMaxChannels((short) 2);  //最大连接数
 		client.setVersion((short) 0x20);   //协议版本
 		client.setWriteLimit(20);   //每个连接的最大发送速度，单位 拆分短信后 条/秒
