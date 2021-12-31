@@ -23,7 +23,7 @@ import com.zx.sms.connect.manager.cmpp.CMPPClientEndpointEntity;
 public class TestCmppClient {
 	private static final Logger logger = LoggerFactory.getLogger(TestCmppClient.class);
 
-	private ExecutorService executor =  Executors.newFixedThreadPool(100);
+	private ExecutorService executor =  Executors.newFixedThreadPool(1000);
 	@Test
 	public void testcmpp() throws Exception {
 		CMPPClientEndpointEntity client = new CMPPClientEndpointEntity();
@@ -31,35 +31,37 @@ public class TestCmppClient {
 		// client.setLocalhost("127.0.0.1");
 		// client.setLocalport(65521);
 		client.setHost("127.0.0.1");
-		client.setPort(37890);
+		client.setPort(7891);
 		client.setChartset(Charset.forName("utf-8"));
 		client.setGroupName("test");
-		client.setUserName("901783");
-		client.setPassword("ICP001");
+		client.setUserName("901782");
+		client.setPassword("ICP");
 
-		client.setMaxChannels((short) 10);
-		client.setVersion((short) 0x30);
+		client.setMaxChannels((short)4);
+		client.setVersion((short) 0x20);
 		client.setRetryWaitTimeSec((short) 30);
 		client.setUseSSL(false);
-		client.setWriteLimit(50);
+//		client.setWriteLimit(50);
 		client.setReSendFailMsg(false);
 		client.setSupportLongmsg(SupportLongMessage.BOTH);
 		SmsClientBuilder builder = new SmsClientBuilder();
-		final SmsClient smsClient = builder.entity(client).keepAllIdleConnection()
+		final SmsClient smsClient = builder.entity(client)
+				.keepAllIdleConnection()  //保持空闲连接，以便能接收上行或者状态报告消息
+				.window(32)             //设置发送窗口
 				.receiver(new MessageReceiver() {
 
 			public void receive(BaseMessage message) {
-				logger.info("receive : {}",message.toString());
+//				logger.info("receive : {}",message.toString());
 			}}).build();
 		Future future = null;
-		for (int i = 0; i < 50; i++) {
+		for (int i = 0; i < 500000; i++) {
 			 future = executor.submit(new Runnable() {
 
 				public void run() {
-					try {
-						Thread.sleep(RandomUtils.nextInt(100, 300));
-					} catch (InterruptedException e1) {
-					}
+//					try {
+//						Thread.sleep(RandomUtils.nextInt(100, 300));
+//					} catch (InterruptedException e1) {
+//					}
 					CmppSubmitRequestMessage msg = new CmppSubmitRequestMessage();
 					msg.setDestterminalId(String.valueOf(System.nanoTime()));
 					msg.setSrcId(String.valueOf(System.nanoTime()));
@@ -68,7 +70,8 @@ public class TestCmppClient {
 					msg.setRegisteredDelivery((short) 0);
 					msg.setServiceId("10086");
 					try {
-						smsClient.send(msg);
+//						smsClient.send(msg);
+						smsClient.asyncSend(msg);
 					} catch (Exception e) {
 						logger.info("send ", e);
 					}

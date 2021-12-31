@@ -33,6 +33,7 @@ public class SmsClientBuilder {
 	private MessageReceiver receiver;
 	private boolean hasBuild = false;
 	private boolean keepAllIdleConnection = false;
+	private int window = 16;
 
 	public SmsClient build() {
 		if (hasBuild)
@@ -73,7 +74,7 @@ public class SmsClientBuilder {
 			public InnerSmsClient create() throws Exception {
 				EndpointEntity innerEntity = buildEndpointEntity();
 
-				InnerSmsClient client = new InnerSmsClient(innerEntity);
+				InnerSmsClient client = new InnerSmsClient(innerEntity,window);
 				return client;
 			}
 
@@ -120,6 +121,11 @@ public class SmsClientBuilder {
 
 	public SmsClientBuilder receiver(MessageReceiver receiver) {
 		this.receiver = receiver;
+		return this;
+	}
+	
+	public SmsClientBuilder window(int window) {
+		this.window = window;
 		return this;
 	}
 

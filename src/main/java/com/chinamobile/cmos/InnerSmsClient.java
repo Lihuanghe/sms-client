@@ -3,6 +3,7 @@ package com.chinamobile.cmos;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
 import org.marre.sms.SmsMessage;
 import org.slf4j.Logger;
@@ -16,7 +17,8 @@ import com.zx.sms.connect.manager.AbstractClientEndpointConnector;
 import com.zx.sms.connect.manager.EndpointEntity;
 import com.zx.sms.session.AbstractSessionStateManager;
 
-import io.netty.channel.ChannelFuture;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.concurrent.Promise;
 
 class InnerSmsClient {
@@ -24,10 +26,23 @@ class InnerSmsClient {
 	private EndpointEntity entity;
 	private volatile boolean connected = false;
 	private AbstractClientEndpointConnector connector;
-
-	InnerSmsClient(EndpointEntity entity) {
+	private Semaphore window;
+	
+	private GenericFutureListener windowListener = new GenericFutureListener() {
+		@Override
+		public void operationComplete(Future future) throws Exception {
+			window.release();
+		}
+	};
+	
+	InnerSmsClient(EndpointEntity entity,int window) {
 		this.entity = entity;
 		this.connector = entity.getSingletonConnector();
+		if(window <= 0) {
+			this.window = new Semaphore(16,true);
+		}else {
+			this.window = new Semaphore(window,true);
+		}
 	}
 
 	private <T extends BaseMessage> List<Promise<T>> syncWriteLongMsgToEntity(T msg) throws Exception {
@@ -52,40 +67,46 @@ class InnerSmsClient {
 	}
 
 	private <T extends BaseMessage> List<Promise<T>> synwrite(List<T> msgs) throws Exception {
-		AbstractSessionStateManager session = ((LoginResponseWaiter)connector).session();
+		AbstractSessionStateManager session = ((LoginResponseWaiter) connector).session();
 		if (session == null) {
 			// 连接已关闭
 			close();
 			if (!open())
 				return null;
-			session = ((LoginResponseWaiter)connector).session();
+			session = ((LoginResponseWaiter) connector).session();
 			if (session == null)
 				return null;
 		}
 
 		List<Promise<T>> arrPromise = new ArrayList<Promise<T>>();
 		for (BaseMessage msg : msgs) {
-			arrPromise.add(session.writeMessagesync(msg));
+			window.acquire();
+			Promise<T> future = session.writeMessagesync(msg);
+			future.addListener(windowListener);
+			arrPromise.add(future);
 		}
 		return arrPromise;
 	}
 
 	private <T extends BaseMessage> List<Promise<T>> synwrite(BaseMessage msg) throws Exception {
-		AbstractSessionStateManager session = ((LoginResponseWaiter)connector).session();
+		AbstractSessionStateManager session = ((LoginResponseWaiter) connector).session();
 		if (session == null) {
 			// 连接已关闭
 			close();
 			if (!open())
 				return null;
-			session = ((LoginResponseWaiter)connector).session();
+			session = ((LoginResponseWaiter) connector).session();
 			if (session == null)
 				return null;
 		}
 		List<Promise<T>> arrPromise = new ArrayList<Promise<T>>();
-		arrPromise.add(session.writeMessagesync(msg));
+		window.acquire();
+		Promise<T> future =session.writeMessagesync(msg);
+		future.addListener(windowListener);
+		
+		arrPromise.add(future);
 		return arrPromise;
 	}
-
 
 	public Promise<BaseMessage> send(BaseMessage msg) throws Exception {
 		if (connected) {
@@ -106,7 +127,7 @@ class InnerSmsClient {
 			return true;
 		connector.open();
 		try {
-			connected = (0 == ((LoginResponseWaiter)connector).responseResult());
+			connected = (0 == ((LoginResponseWaiter) connector).responseResult());
 			return connected;
 		} catch (Exception e) {
 			logger.warn("", e);
@@ -121,8 +142,8 @@ class InnerSmsClient {
 	}
 
 	public boolean isConnected() {
-		 connected = ((LoginResponseWaiter)connector).session() != null;
-		 return connected;
+		connected = ((LoginResponseWaiter) connector).session() != null;
+		return connected;
 	}
 
 	@Override
