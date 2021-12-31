@@ -10,6 +10,14 @@
 
 # How To Use
 
+```xml
+<dependency>
+  <groupId>com.chinamobile.cmos</groupId>
+  <artifactId>sms-client</artifactId>
+  <version>0.0.1</version>
+</dependency>
+```
+
 - `如何发送短信？`
 
   参考test包里的测试用例 ：
@@ -34,9 +42,13 @@
 		
 		//SmsClientBuilder 适合和单例 ，一个通道账号只build一次
 		SmsClientBuilder builder = new SmsClientBuilder();
-		final SmsClient smsClient = builder.entity(client).receiver(new MessageReceiver() {
+		final SmsClient smsClient = builder.entity(client)
+				.keepAllIdleConnection()  //保持空闲连接，以便能接收上行或者状态报告消息
+				.window(32)             //设置发送窗口
+				.receiver(new MessageReceiver() {
+
 			public void receive(BaseMessage message) {
-				logger.info("receive: {} ",message.toString());
+				logger.info("receive : {}",message.toString());
 			}}).build();
 		Future future = null;
 		
