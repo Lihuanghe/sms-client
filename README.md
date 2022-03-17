@@ -14,7 +14,7 @@
 <dependency>
   <groupId>com.chinamobile.cmos</groupId>
   <artifactId>sms-client</artifactId>
-  <version>0.0.1</version>
+  <version>0.0.2</version>
 </dependency>
 ```
 
