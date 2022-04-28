@@ -63,6 +63,7 @@ class InnerSMPPEndpointConnector extends SMPPClientEndpointConnector   implement
 					atomicReference.set((AbstractSessionStateManager)ctx.pipeline().get("sessionStateManager"));
 					loginResponseFuture.trySuccess(0);
 				}
+				super.userEventTriggered(ctx, evt);
 			}
 		});
 	}

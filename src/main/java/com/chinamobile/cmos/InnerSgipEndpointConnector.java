@@ -62,6 +62,7 @@ class InnerSgipEndpointConnector extends SgipClientEndpointConnector   implement
 					atomicReference.set((AbstractSessionStateManager)ctx.pipeline().get("sessionStateManager"));
 					loginResponseFuture.trySuccess(0);
 				}
+				super.userEventTriggered(ctx, evt);
 			}
 		});
 	}

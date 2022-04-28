@@ -53,4 +53,7 @@ public class SmsClient {
 		}
 	}
 	
+	public void close()  throws Exception{
+		pool.close();
+	}
 }
