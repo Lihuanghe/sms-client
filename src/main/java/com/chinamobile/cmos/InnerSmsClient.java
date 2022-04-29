@@ -107,6 +107,19 @@ class InnerSmsClient {
 		arrPromise.add(future);
 		return arrPromise;
 	}
+	
+	public <T extends BaseMessage> Promise<T> rawwrite(List<T> msgs) throws Exception {
+		if (connected) {
+			List<Promise<T>> promises =  synwrite(msgs);
+			if (promises == null) {
+				throw new IOException("connection usable.");
+			}
+			Promise<T> promise = promises.get(promises.size() - 1);
+			return promise;
+		} else {
+			throw new IOException("connection usable.");
+		}
+	}
 
 	public Promise<BaseMessage> send(BaseMessage msg) throws Exception {
 		if (connected) {

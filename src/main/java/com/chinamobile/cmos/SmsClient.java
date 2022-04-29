@@ -1,5 +1,7 @@
 package com.chinamobile.cmos;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.pool2.impl.GenericObjectPool;
@@ -29,6 +31,19 @@ public class SmsClient {
 		try {
 			Promise<BaseMessage> promise = client.send(msg);
 			promise.awaitUninterruptibly(timeOut,TimeUnit.MILLISECONDS);
+			return promise.get();
+		}finally {
+			pool.returnObject(client);
+		}
+	}
+	
+	public BaseMessage sendRawMsg(BaseMessage msg) throws Exception {
+		InnerSmsClient  client = pool.borrowObject();
+		try {
+			List<BaseMessage> list = new ArrayList();
+			list.add(msg);
+			Promise<BaseMessage> promise =  client.rawwrite(list);
+			promise.awaitUninterruptibly();
 			return promise.get();
 		}finally {
 			pool.returnObject(client);
