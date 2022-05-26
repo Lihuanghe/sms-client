@@ -42,7 +42,7 @@ public class SmsClientBuilder {
 			config = new GenericObjectPoolConfig();
 			//连接空闲超过此时间，并且空闲个数大于最大空闲连接数，连接收回
 			config.setSoftMinEvictableIdleTimeMillis(30000);
-			config.setMinIdle(2); //至少保留1个连接
+			config.setMinIdle(1); //至少保留1个连接
 		}
 		
 		//这个配置影响断点续连 ，连接空闲超过此时间强制关闭回收连接
