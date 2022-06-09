@@ -21,30 +21,32 @@ public class TestSMGPClient {
 
 	private ExecutorService executor =  Executors.newFixedThreadPool(10);
 	@Test
-	public void testcmpp() throws Exception {
+	public void testsmgp() throws Exception {
 		SMGPClientEndpointEntity client = new SMGPClientEndpointEntity();
 		client.setId("smgpclient");
 		client.setHost("127.0.0.1");
-		client.setPort(9890);
-		client.setClientID("333");
-		client.setPassword("0555");
+		client.setPort(19890);
+		client.setClientID("test01");
+		client.setPassword("1qaz2wsx");
 		client.setChannelType(ChannelType.DUPLEX);
 
-		client.setMaxChannels((short)2);
+		client.setMaxChannels((short)10);
 		client.setRetryWaitTimeSec((short)100);
 		client.setUseSSL(false);
 		client.setReSendFailMsg(false);
-		client.setClientVersion((byte)0x13);
+		client.setClientVersion((byte)0x48);
 		
 		SmsClientBuilder builder = new SmsClientBuilder();
-		final SmsClient smsClient = builder.entity(client).receiver(new MessageReceiver() {
+		final SmsClient smsClient = builder.entity(client)
+				.keepAllIdleConnection()
+				.receiver(new MessageReceiver() {
 
 			public void receive(BaseMessage message) {
 				logger.info(message.toString());
 				
 			}}).build();
 		Future future = null;
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < 50000; i++) {
 			 future = executor.submit(new Runnable() {
 
 				public void run() {
@@ -54,7 +56,7 @@ public class TestSMGPClient {
 			        pdu.setMsgContent("SMGPSubmitMessage");
 			        pdu.setNeedReport(true);
 					try {
-						smsClient.send(pdu, 1000);
+						smsClient.asyncSend(pdu);
 					} catch (Exception e) {
 						logger.info("send ", e);
 					}
@@ -63,7 +65,7 @@ public class TestSMGPClient {
 			});
 		}
 		future.get();
-		Thread.sleep(5000);
+		Thread.sleep(5000000);
 		
 	}
 }

@@ -22,20 +22,20 @@ public class TestSmppClient {
 
 	private ExecutorService executor =  Executors.newFixedThreadPool(10);
 	@Test
-	public void testcmpp() throws Exception {
+	public void testsmpp() throws Exception {
 		SMPPClientEndpointEntity client = new SMPPClientEndpointEntity();
 		client.setId("smppclient");
 		client.setHost("127.0.0.1");
-		client.setPort(27761);
-		client.setSystemId("901782");
-		client.setPassword("ICP");
+		client.setPort(18890);
+		client.setSystemId("test01");
+		client.setPassword("1qaz2wsx");
 		client.setChannelType(ChannelType.DUPLEX);
 
-		client.setMaxChannels((short)2);
+		client.setMaxChannels((short)10);
 		client.setRetryWaitTimeSec((short)100);
 		client.setUseSSL(false);
 		client.setReSendFailMsg(false);
-		client.setWriteLimit(20);
+//		client.setWriteLimit(20);
 //		client.setReadLimit(200);
 		SmsClientBuilder builder = new SmsClientBuilder();
 		final SmsClient smsClient = builder.entity(client).receiver(new MessageReceiver() {
@@ -50,7 +50,7 @@ public class TestSmppClient {
 
 				public void run() {
 					SubmitSm pdu = new SubmitSm();
-					pdu.setRegisteredDelivery((byte)0);
+					pdu.setRegisteredDelivery((byte)1);
 			        pdu.setSourceAddress(new Address((byte)0,(byte)0,"10086"));
 			        pdu.setDestAddress(new Address((byte)0,(byte)0,"13800138000"));
 //			        pdu.setSmsMsg(new SmsTextMessage(content,SmsDcs.getGeneralDataCodingDcs(SmsAlphabet.GSM,SmsMsgClass.CLASS_UNKNOWN)));
@@ -65,7 +65,7 @@ public class TestSmppClient {
 			});
 		}
 		future.get();
-		Thread.sleep(5000);
+		Thread.sleep(5000000);
 		
 	}
 }

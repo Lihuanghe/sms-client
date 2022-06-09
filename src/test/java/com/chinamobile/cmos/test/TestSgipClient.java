@@ -21,29 +21,30 @@ public class TestSgipClient {
 
 	private ExecutorService executor =  Executors.newFixedThreadPool(10);
 	@Test
-	public void testcmpp() throws Exception {
+	public void testSgip() throws Exception {
 		SgipClientEndpointEntity client = new SgipClientEndpointEntity();
 		client.setId("sgipclient");
 		client.setHost("127.0.0.1");
-		client.setPort(8001);
-		client.setLoginName("333");
-		client.setLoginPassowrd("0555");
+		client.setPort(16890);
+		client.setLoginName("test01");
+		client.setLoginPassowrd("1qaz2wsx");
 		client.setChannelType(ChannelType.DUPLEX);
 		client.setNodeId(3073100002L);
-		client.setMaxChannels((short)3);
+		client.setMaxChannels((short)10);
 		client.setRetryWaitTimeSec((short)100);
 		client.setUseSSL(false);
 		client.setReSendFailMsg(false);
 		client.setIdleTimeSec((short)120);
 		SmsClientBuilder builder = new SmsClientBuilder();
-		final SmsClient smsClient = builder.entity(client).receiver(new MessageReceiver() {
+		final SmsClient smsClient = builder.entity(client)
+				.keepAllIdleConnection()
+				.receiver(new MessageReceiver() {
 
 			public void receive(BaseMessage message) {
 				logger.info(message.toString());
-				
 			}}).build();
 		Future future = null;
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < 50000; i++) {
 			 future = executor.submit(new Runnable() {
 
 				public void run() {
@@ -53,7 +54,7 @@ public class TestSgipClient {
 					requestMessage.setMsgContent("老师好，接工信部投诉，烦请协");
 					requestMessage.setReportflag((short)1);
 					try {
-						smsClient.send(requestMessage, 1000);
+						smsClient.asyncSend(requestMessage);
 					} catch (Exception e) {
 						logger.info("send ", e);
 					}
@@ -62,7 +63,7 @@ public class TestSgipClient {
 			});
 		}
 		future.get();
-		Thread.sleep(5000);
+		Thread.sleep(5000000);
 		
 	}
 }

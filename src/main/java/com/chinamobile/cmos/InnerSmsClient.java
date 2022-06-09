@@ -26,23 +26,17 @@ class InnerSmsClient {
 	private EndpointEntity entity;
 	private volatile boolean connected = false;
 	private AbstractClientEndpointConnector connector;
-	private Semaphore window;
 	
 	private GenericFutureListener windowListener = new GenericFutureListener() {
 		@Override
 		public void operationComplete(Future future) throws Exception {
-			window.release();
 		}
 	};
 	
 	InnerSmsClient(EndpointEntity entity,int window) {
 		this.entity = entity;
+		this.entity.setWindow(window);
 		this.connector = entity.getSingletonConnector();
-		if(window <= 0) {
-			this.window = new Semaphore(16,true);
-		}else {
-			this.window = new Semaphore(window,true);
-		}
 	}
 
 	private <T extends BaseMessage> List<Promise<T>> syncWriteLongMsgToEntity(T msg) throws Exception {
@@ -80,7 +74,6 @@ class InnerSmsClient {
 
 		List<Promise<T>> arrPromise = new ArrayList<Promise<T>>();
 		for (BaseMessage msg : msgs) {
-			window.acquire();
 			Promise<T> future = session.writeMessagesync(msg);
 			future.addListener(windowListener);
 			arrPromise.add(future);
@@ -100,7 +93,6 @@ class InnerSmsClient {
 				return null;
 		}
 		List<Promise<T>> arrPromise = new ArrayList<Promise<T>>();
-		window.acquire();
 		Promise<T> future =session.writeMessagesync(msg);
 		future.addListener(windowListener);
 		
