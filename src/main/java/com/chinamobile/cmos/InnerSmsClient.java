@@ -27,12 +27,6 @@ class InnerSmsClient {
 	private volatile boolean connected = false;
 	private AbstractClientEndpointConnector connector;
 	
-	private GenericFutureListener windowListener = new GenericFutureListener() {
-		@Override
-		public void operationComplete(Future future) throws Exception {
-		}
-	};
-	
 	InnerSmsClient(EndpointEntity entity,int window) {
 		this.entity = entity;
 		this.entity.setWindow(window);
@@ -75,7 +69,6 @@ class InnerSmsClient {
 		List<Promise<T>> arrPromise = new ArrayList<Promise<T>>();
 		for (BaseMessage msg : msgs) {
 			Promise<T> future = session.writeMessagesync(msg);
-			future.addListener(windowListener);
 			arrPromise.add(future);
 		}
 		return arrPromise;
@@ -94,8 +87,6 @@ class InnerSmsClient {
 		}
 		List<Promise<T>> arrPromise = new ArrayList<Promise<T>>();
 		Promise<T> future =session.writeMessagesync(msg);
-		future.addListener(windowListener);
-		
 		arrPromise.add(future);
 		return arrPromise;
 	}
