@@ -13,62 +13,70 @@ import io.netty.util.concurrent.Promise;
 public class SmsClient {
 
 	private GenericObjectPool<InnerSmsClient> pool;
+
 	SmsClient(GenericObjectPool<InnerSmsClient> pool) {
 		this.pool = pool;
 	}
+
 	public BaseMessage send(BaseMessage msg) throws Exception {
-		InnerSmsClient  client = pool.borrowObject();
+		InnerSmsClient client = pool.borrowObject();
+		Promise<BaseMessage> promise;
 		try {
-			Promise<BaseMessage> promise =  client.send(msg);
-			promise.awaitUninterruptibly();
-			return promise.get();
-		}finally {
+			promise = client.send(msg);
+		} finally {
 			pool.returnObject(client);
 		}
+		promise.awaitUninterruptibly();
+		return promise.get();
 	}
-	public BaseMessage send(BaseMessage msg,int timeOut) throws Exception {
-		InnerSmsClient  client = pool.borrowObject();
+
+	public BaseMessage send(BaseMessage msg, int timeOut) throws Exception {
+		InnerSmsClient client = pool.borrowObject();
+		Promise<BaseMessage> promise;
 		try {
-			Promise<BaseMessage> promise = client.send(msg);
-			promise.awaitUninterruptibly(timeOut,TimeUnit.MILLISECONDS);
-			return promise.get();
-		}finally {
+			promise = client.send(msg);
+		} finally {
 			pool.returnObject(client);
 		}
+		promise.awaitUninterruptibly(timeOut, TimeUnit.MILLISECONDS);
+		return promise.get();
 	}
-	
+
 	public BaseMessage sendRawMsg(BaseMessage msg) throws Exception {
-		InnerSmsClient  client = pool.borrowObject();
+		InnerSmsClient client = pool.borrowObject();
+
+		Promise<BaseMessage> promise;
 		try {
 			List<BaseMessage> list = new ArrayList();
 			list.add(msg);
-			Promise<BaseMessage> promise =  client.rawwrite(list);
-			promise.awaitUninterruptibly();
-			return promise.get();
-		}finally {
+			promise = client.rawwrite(list);
+
+		} finally {
 			pool.returnObject(client);
 		}
+		promise.awaitUninterruptibly();
+		return promise.get();
 	}
-	
+
 	public Promise<BaseMessage> asyncSend(BaseMessage msg) throws Exception {
-		InnerSmsClient  client = pool.borrowObject();
+		InnerSmsClient client = pool.borrowObject();
 		try {
-			return  client.send(msg);
-		}finally {
+			return client.send(msg);
+		} finally {
 			pool.returnObject(client);
 		}
 	}
 
-	public boolean open()  throws Exception{
-		InnerSmsClient  client = pool.borrowObject();
+	public boolean open() throws Exception {
+		InnerSmsClient client = pool.borrowObject();
 		try {
-			return  client.open();
-		}finally {
+			return client.open();
+		} finally {
 			pool.returnObject(client);
 		}
 	}
-	
-	public void close()  throws Exception{
+
+	public void close() throws Exception {
 		pool.close();
 	}
 }
