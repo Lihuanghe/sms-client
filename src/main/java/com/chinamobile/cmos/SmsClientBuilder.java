@@ -74,8 +74,8 @@ public class SmsClientBuilder {
 			public InnerSmsClient create() throws Exception {
 				EndpointEntity innerEntity = buildEndpointEntity();
 
-				InnerSmsClient client = new InnerSmsClient(innerEntity,window);
-				return client;
+				InnerSmsClient innerSmsClient = new InnerSmsClient(innerEntity,window);
+				return innerSmsClient;
 			}
 
 			@Override
@@ -84,18 +84,18 @@ public class SmsClientBuilder {
 			}
 
 			public void activateObject(PooledObject<InnerSmsClient> p) throws Exception {
-				InnerSmsClient client = p.getObject();
-				client.open();
+				InnerSmsClient innerSmsClient = p.getObject();
+				innerSmsClient.open();
 			}
 
 			public boolean validateObject(PooledObject<InnerSmsClient> p) {
-				InnerSmsClient client = p.getObject();
-				return client.isConnected();
+				InnerSmsClient innerSmsClient = p.getObject();
+				return innerSmsClient.isConnected();
 			}
 
 			public void destroyObject(PooledObject<InnerSmsClient> p) throws Exception {
-				InnerSmsClient client = p.getObject();
-				client.close();
+				InnerSmsClient innerSmsClient = p.getObject();
+				innerSmsClient.close();
 			}
 		}, config);
 		hasBuild = true;

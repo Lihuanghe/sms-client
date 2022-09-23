@@ -55,18 +55,18 @@
 		Future future = null;
 		
 		//发送5000条短信
-		for (int i = 0; i < 5000; i++) {
+		for (int i = 0; i < 1; i++) {
 			 future = executor.submit(new Runnable() {
 
 				public void run() {
 					//new 一个短信 Request对象
 					CmppSubmitRequestMessage msg = new CmppSubmitRequestMessage();
-					msg.setDestterminalId(String.valueOf(System.nanoTime()));
-					msg.setSrcId(String.valueOf(System.nanoTime()));
+					msg.setDestterminalId(String.valueOf(13800138000));
+					msg.setSrcId(String.valueOf(10699802323));
 					msg.setLinkID("0000");
 					msg.setMsgContent("老师好，接工信部投诉");
 					msg.setRegisteredDelivery((short) 1);
-					msg.setServiceId("10086");
+					msg.setServiceId("ssss");
 					CmppSubmitResponseMessage response;
 					try {
 					//调用send方法发送

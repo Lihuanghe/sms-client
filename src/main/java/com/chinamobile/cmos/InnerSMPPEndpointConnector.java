@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.zx.sms.common.GlobalConstance;
 import com.zx.sms.connect.manager.smpp.SMPPClientEndpointConnector;
 import com.zx.sms.connect.manager.smpp.SMPPClientEndpointEntity;
 import com.zx.sms.session.AbstractSessionStateManager;
@@ -60,7 +61,7 @@ class InnerSMPPEndpointConnector extends SMPPClientEndpointConnector   implement
 			};
 			public void userEventTriggered(final ChannelHandlerContext ctx, Object evt) throws Exception {
 				if (evt == SessionState.Connect) {
-					atomicReference.set((AbstractSessionStateManager)ctx.pipeline().get("sessionStateManager"));
+					atomicReference.set(ctx.channel().attr(GlobalConstance.sessionKey).get());
 					loginResponseFuture.trySuccess(0);
 				}
 				super.userEventTriggered(ctx, evt);
