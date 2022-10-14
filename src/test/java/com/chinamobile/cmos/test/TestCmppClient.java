@@ -1,11 +1,11 @@
 package com.chinamobile.cmos.test;
 
 import java.nio.charset.Charset;
+import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.apache.commons.lang3.RandomUtils;
 import org.junit.Test;
 import org.marre.sms.SmsDcs;
 import org.marre.sms.SmsTextMessage;
@@ -23,7 +23,7 @@ import com.zx.sms.connect.manager.cmpp.CMPPClientEndpointEntity;
 public class TestCmppClient {
 	private static final Logger logger = LoggerFactory.getLogger(TestCmppClient.class);
 
-	private ExecutorService executor =  Executors.newFixedThreadPool(10);
+	private ExecutorService executor =  Executors.newFixedThreadPool(5);
 	@Test
 	public void testcmpp() throws Exception {
 		CMPPClientEndpointEntity client = new CMPPClientEndpointEntity();
@@ -37,7 +37,7 @@ public class TestCmppClient {
 		client.setUserName("test01");
 		client.setPassword("1qaz2wsx");
 
-		client.setMaxChannels((short)10);
+		client.setMaxChannels((short)1);
 		client.setVersion((short) 0x20);
 		client.setRetryWaitTimeSec((short) 30);
 		client.setCloseWhenRetryFailed(false);
@@ -46,17 +46,21 @@ public class TestCmppClient {
 //		client.setWriteLimit(100);
 		client.setReSendFailMsg(false);
 		client.setSupportLongmsg(SupportLongMessage.BOTH);
+		
+		String uri = "cmpp://127.0.0.1:17890?username=test01&password=1qaz2wsx&version=32&spcode=10086&msgsrc=test01&serviceid=000000&maxchannel=10";
+		
 		SmsClientBuilder builder = new SmsClientBuilder();
-		final SmsClient smsClient = builder.entity(client)
+		final SmsClient smsClient = builder.uri(uri)
 				.keepAllIdleConnection()  //保持空闲连接，以便能接收上行或者状态报告消息
-				.window(32)             //设置发送窗口
+				.window(-1)             //设置发送窗口
 				.receiver(new MessageReceiver() {
-
 			public void receive(BaseMessage message) {
-//				logger.info("receive : {}",message.toString());
+				
 			}}).build();
 		Future future = null;
-		for (int i = 0; i <100000; i++) {
+		smsClient.open();
+		Thread.sleep(3000);
+		for (int i = 0; i <200000; i++) {
 			 future = executor.submit(new Runnable() {
 
 				public void run() {
@@ -66,11 +70,13 @@ public class TestCmppClient {
 					msg.setSrcId(String.valueOf(System.nanoTime()));
 					msg.setLinkID("0000");
 					msg.setMsgContent(new SmsTextMessage("老师好，CmppSubmitRequestMessage msg = new CmppSubmitRequestMessage()",new SmsDcs((byte)8)));
-					msg.setRegisteredDelivery((short) 1);
+					msg.setRegisteredDelivery((short) 0);
 					msg.setServiceId("10086");
 					try {
-//						smsClient.send(msg);
+						Date time = new Date();
+//						BaseMessage res = smsClient.send(msg);
 						smsClient.asyncSend(msg);
+//						logger.error("receive : {}-{}",DateFormatUtils.format(time, "HH:mm:ss.SSS") ,res.toString());
 //						Thread.yield();
 					} catch (Exception e) {
 						logger.info("send ", e);
@@ -78,9 +84,9 @@ public class TestCmppClient {
 				}
 				
 			});
-			 if(RandomUtils.nextInt(1,100)>50)future.get();
+			 
 		}
-		future.get();
+		if(future!=null)future.get();
 		logger.error("=============finish============");
 		Thread.sleep(5000000);
 		

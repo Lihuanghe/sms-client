@@ -1,7 +1,10 @@
 package com.chinamobile.cmos;
 
 import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -13,8 +16,11 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.chinamobile.cmos.protocol.ProtocolProcessor;
+import com.chinamobile.cmos.protocol.ProtocolProcessorFactory;
 import com.zx.sms.BaseMessage;
 import com.zx.sms.connect.manager.EndpointEntity;
+import com.zx.sms.connect.manager.EndpointEntity.ChannelType;
 import com.zx.sms.connect.manager.cmpp.CMPPClientEndpointEntity;
 import com.zx.sms.connect.manager.sgip.SgipClientEndpointEntity;
 import com.zx.sms.connect.manager.smgp.SMGPClientEndpointEntity;
@@ -114,6 +120,12 @@ public class SmsClientBuilder {
 		return this;
 	}
 	
+	public SmsClientBuilder uri(String uri) throws Exception {
+		EndpointEntity entity = createEndpointEntity(uri);
+		this.entity = entity;
+		return this;
+	}
+	
 	public SmsClientBuilder keepAllIdleConnection() {
 		this.keepAllIdleConnection = true;
 		return this;
@@ -127,6 +139,51 @@ public class SmsClientBuilder {
 	public SmsClientBuilder window(int window) {
 		this.window = window;
 		return this;
+	}
+	
+	public EndpointEntity createEndpointEntity(String str_uri) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+		URI uri = URI.create(str_uri);
+		String protocol = uri.getScheme();
+		Map<String, String> queryMap = queryToMap(uri.getQuery());
+		ProtocolProcessor p = ProtocolProcessorFactory.build(protocol);
+		
+		EndpointEntity e = p.buildClient(queryMap);
+		
+		String proxy = queryMap.get("proxy");
+		String id = queryMap.get("id");
+		String maxchannel = queryMap.get("maxchannel");
+		Integer maxc = Integer.parseInt((StringUtils.isBlank(maxchannel)?"1":maxchannel));
+		
+		
+		e.setId(StringUtils.isBlank(id)?"client":id);
+		e.setHost(uri.getHost());
+		e.setPort(uri.getPort());
+		e.setValid(true);
+		e.setChannelType(ChannelType.DUPLEX);
+		e.setMaxChannels((short) maxc.shortValue());
+		e.setProxy(proxy);
+		
+		return e;
+	}
+	
+	private static Map<String, String> queryToMap(String query) {
+		if (StringUtils.isBlank(query))
+			return null;
+		Map<String, String> result = new HashMap();
+		String[] parameters = query.split("&");
+		if (parameters.length > 0) {
+			for (String pairs : parameters) {
+				if (StringUtils.isBlank(pairs))
+					continue;
+				String[] kv = pairs.split("=");
+				if (kv.length > 1) {
+					result.put(kv[0], kv[1]);
+				} else {
+					result.put(kv[0], "");
+				}
+			}
+		}
+		return result;
 	}
 
 	private EndpointEntity buildEndpointEntity() {
