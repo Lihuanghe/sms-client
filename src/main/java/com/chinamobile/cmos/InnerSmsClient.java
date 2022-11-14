@@ -116,6 +116,18 @@ class InnerSmsClient {
 			throw new IOException("connection usable.");
 		}
 	}
+	
+	public List<Promise<BaseMessage>> sendAndWaitAllReponse(BaseMessage msg) throws Exception {
+		if (connected) {
+			List<Promise<BaseMessage>> promises = syncWriteLongMsgToEntity(msg);
+			if (promises == null) {
+				throw new IOException("connection usable.");
+			}
+			return promises;
+		} else {
+			throw new IOException("connection usable.");
+		}
+	}
 
 	public boolean open() throws Exception {
 

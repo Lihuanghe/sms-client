@@ -16,8 +16,10 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cedarsoftware.util.ReflectionUtils;
 import com.chinamobile.cmos.protocol.ProtocolProcessor;
 import com.chinamobile.cmos.protocol.ProtocolProcessorFactory;
+import com.google.common.reflect.Reflection;
 import com.zx.sms.BaseMessage;
 import com.zx.sms.connect.manager.EndpointEntity;
 import com.zx.sms.connect.manager.EndpointEntity.ChannelType;
@@ -141,13 +143,15 @@ public class SmsClientBuilder {
 		return this;
 	}
 	
-	public EndpointEntity createEndpointEntity(String str_uri) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+	public EndpointEntity createEndpointEntity(String str_uri) throws ClassNotFoundException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		URI uri = URI.create(str_uri);
 		String protocol = uri.getScheme();
 		Map<String, String> queryMap = queryToMap(uri.getQuery());
 		ProtocolProcessor p = ProtocolProcessorFactory.build(protocol);
 		
 		EndpointEntity e = p.buildClient(queryMap);
+		
+		BeanUtils.copyProperties(e, queryMap);
 		
 		String proxy = queryMap.get("proxy");
 		String id = queryMap.get("id");
@@ -162,6 +166,8 @@ public class SmsClientBuilder {
 		e.setChannelType(ChannelType.DUPLEX);
 		e.setMaxChannels((short) maxc.shortValue());
 		e.setProxy(proxy);
+		
+		
 		
 		return e;
 	}

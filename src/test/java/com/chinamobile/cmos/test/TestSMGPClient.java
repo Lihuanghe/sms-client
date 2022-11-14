@@ -28,13 +28,13 @@ public class TestSMGPClient {
 		client.setPort(19890);
 		client.setClientID("test01");
 		client.setPassword("1qaz2wsx");
-		client.setChannelType(ChannelType.DUPLEX);
+		client.setChannelType(ChannelType.DOWN);
 
 		client.setMaxChannels((short)10);
 		client.setRetryWaitTimeSec((short)100);
 		client.setUseSSL(false);
 		client.setReSendFailMsg(false);
-		client.setClientVersion((byte)0x48);
+		client.setClientVersion((byte)0x30);
 		
 		SmsClientBuilder builder = new SmsClientBuilder();
 		final SmsClient smsClient = builder.entity(client)

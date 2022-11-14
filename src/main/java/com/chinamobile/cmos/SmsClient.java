@@ -66,6 +66,16 @@ public class SmsClient {
 			pool.returnObject(client);
 		}
 	}
+	
+	public List<Promise<BaseMessage>> sendAndWaitAllReponse(BaseMessage msg) throws Exception {
+		InnerSmsClient client = pool.borrowObject();
+		try {
+			return client.sendAndWaitAllReponse(msg);
+		} finally {
+			pool.returnObject(client);
+		}
+	}
+	
 
 	public boolean open() throws Exception {
 		InnerSmsClient client = pool.borrowObject();
