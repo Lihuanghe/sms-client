@@ -28,7 +28,7 @@ public class TestSMGPClient {
 		client.setPort(19890);
 		client.setClientID("test01");
 		client.setPassword("1qaz2wsx");
-		client.setChannelType(ChannelType.DOWN);
+		client.setChannelType(ChannelType.DUPLEX);
 
 		client.setMaxChannels((short)10);
 		client.setRetryWaitTimeSec((short)100);
@@ -46,7 +46,7 @@ public class TestSMGPClient {
 				
 			}}).build();
 		Future future = null;
-		for (int i = 0; i < 50000; i++) {
+		for (int i = 0; i < 50; i++) {
 			 future = executor.submit(new Runnable() {
 
 				public void run() {

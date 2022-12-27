@@ -3,22 +3,17 @@ package com.chinamobile.cmos;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Semaphore;
 
-import org.marre.sms.SmsMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.zx.sms.BaseMessage;
 import com.zx.sms.LongSMSMessage;
-import com.zx.sms.codec.cmpp.wap.LongMessageFrame;
-import com.zx.sms.codec.cmpp.wap.LongMessageFrameHolder;
+import com.zx.sms.common.util.ChannelUtil;
 import com.zx.sms.connect.manager.AbstractClientEndpointConnector;
 import com.zx.sms.connect.manager.EndpointEntity;
 import com.zx.sms.session.AbstractSessionStateManager;
 
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.concurrent.Promise;
 
 class InnerSmsClient {
@@ -37,16 +32,9 @@ class InnerSmsClient {
 		if (msg instanceof LongSMSMessage) {
 			LongSMSMessage<T> lmsg = (LongSMSMessage<T>) msg;
 			if (!lmsg.isReport()) {
-				// 长短信拆分
-				SmsMessage msgcontent = lmsg.getSmsMessage();
-				List<LongMessageFrame> frameList = LongMessageFrameHolder.INS.splitmsgcontent(msgcontent);
-
-				// 保证同一条长短信，通过同一个tcp连接发送
-				List<T> msgs = new ArrayList<T>();
-				for (LongMessageFrame frame : frameList) {
-					T basemsg = (T) lmsg.generateMessage(frame);
-					msgs.add(basemsg);
-				}
+			
+				List<T> msgs = ChannelUtil.splitLongSmsMessage(entity, msg);
+				
 				return synwrite(msgs);
 			}
 		}

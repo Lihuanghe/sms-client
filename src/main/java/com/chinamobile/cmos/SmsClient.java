@@ -67,7 +67,7 @@ public class SmsClient {
 		}
 	}
 	
-	public List<Promise<BaseMessage>> sendAndWaitAllReponse(BaseMessage msg) throws Exception {
+	public List<Promise<BaseMessage>> sendAndWaitAllResponse(BaseMessage msg) throws Exception {
 		InnerSmsClient client = pool.borrowObject();
 		try {
 			return client.sendAndWaitAllReponse(msg);

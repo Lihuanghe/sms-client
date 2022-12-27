@@ -23,35 +23,16 @@
   参考test包里的测试用例 ：
   
 ```java
-		CMPPClientEndpointEntity client = new CMPPClientEndpointEntity();
-		client.setId("client");
-		// client.setLocalhost("127.0.0.1");
-		// client.setLocalport(65521);
-		client.setHost("127.0.0.1");   //服务器IP
-		client.setPort(37890);        //端口
-		client.setChartset(Charset.forName("utf-8"));
-		client.setGroupName("test");
-		client.setUserName("901783");  //企业代码
-		client.setPassword("ICP001");  //密码
-//	client.setProxy("http://username:password@ipaddress:port");  //http代理
-//	client.setProxy("socks4://username:password@ipaddress:port");  //socks4代理
-//	client.setProxy("socks5://username:password@ipaddress:port");  //socks5代理
-		client.setMaxChannels((short) 2);  //最大连接数
-		client.setVersion((short) 0x20);   //协议版本
-		client.setWriteLimit(20);   //每个连接的最大发送速度，单位 拆分短信后 条/秒
-		client.setReSendFailMsg(false);
-		client.setSupportLongmsg(SupportLongMessage.BOTH);
-		
-		//SmsClientBuilder 适合和单例 ，一个通道账号只build一次
-		SmsClientBuilder builder = new SmsClientBuilder();
-		final SmsClient smsClient = builder.entity(client)
-				.keepAllIdleConnection()  //保持空闲连接，以便能接收上行或者状态报告消息
-				.window(32)             //设置发送窗口
-				.receiver(new MessageReceiver() {
+		String uri = "cmpp://127.0.0.1:17890?username=test01&password=1qaz2wsx&version=32&spcode=10086&msgsrc=test01&serviceid=000000&window=32&maxchannel=1";
 
-			public void receive(BaseMessage message) {
-				logger.info("receive : {}",message.toString());
-			}}).build();
+		SmsClientBuilder builder = new SmsClientBuilder();
+//		EndpointEntity client =  builder.createEndpointEntity(uri);
+		final SmsClient smsClient = builder.uri(uri) // 保持空闲连接，以便能接收上行或者状态报告消息
+				.receiver(new MessageReceiver() {
+					public void receive(BaseMessage message) {
+//						System.out.println(message.toString());
+					}
+				}).build();
 		Future future = null;
 		
 		//发送5000条短信
@@ -64,7 +45,7 @@
 					msg.setDestterminalId(String.valueOf(13800138000));
 					msg.setSrcId(String.valueOf(10699802323));
 					msg.setLinkID("0000");
-					msg.setMsgContent("老师好，接工信部投诉");
+					msg.setMsgContent("老师好，Hello World");
 					msg.setRegisteredDelivery((short) 1);
 					msg.setServiceId("ssss");
 					CmppSubmitResponseMessage response;
@@ -87,7 +68,9 @@
 
 - `如何接收短信？`
 
-  参考test包里的测试用例 ： 创建 Builder的时候注册 `MessageReceiver`类
+  参考test包里的测试用例 ： 创建 Builder的时候注册 `MessageReceiver`类。
+  
+  `SGIP`协议是特例，因为该协议要求开启一个Server端口，网关作为客户端连上来推送上行短信和状态报告。
 
 - `使用 http 或者 socks 代理`
 
