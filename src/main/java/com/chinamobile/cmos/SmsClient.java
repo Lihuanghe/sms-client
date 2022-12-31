@@ -58,6 +58,15 @@ public class SmsClient {
 		promise.awaitUninterruptibly();
 		return promise.get();
 	}
+	
+	public Promise<BaseMessage> asyncSendJustInChannel(BaseMessage msg) throws Exception {
+		InnerSmsClient client = pool.borrowObject();
+		try {
+			return client.asyncsend(msg);
+		} finally {
+			pool.returnObject(client);
+		}
+	}
 
 	public Promise<BaseMessage> asyncSend(BaseMessage msg) throws Exception {
 		InnerSmsClient client = pool.borrowObject();

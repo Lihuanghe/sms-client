@@ -9,11 +9,13 @@ import org.slf4j.LoggerFactory;
 
 import com.zx.sms.BaseMessage;
 import com.zx.sms.LongSMSMessage;
-import com.zx.sms.common.util.ChannelUtil;
+import com.zx.sms.codec.cmpp.wap.LongMessageFrameHolder;
 import com.zx.sms.connect.manager.AbstractClientEndpointConnector;
 import com.zx.sms.connect.manager.EndpointEntity;
 import com.zx.sms.session.AbstractSessionStateManager;
 
+import io.netty.util.concurrent.DefaultPromise;
+import io.netty.util.concurrent.GlobalEventExecutor;
 import io.netty.util.concurrent.Promise;
 
 class InnerSmsClient {
@@ -33,7 +35,7 @@ class InnerSmsClient {
 			LongSMSMessage<T> lmsg = (LongSMSMessage<T>) msg;
 			if (!lmsg.isReport()) {
 			
-				List<T> msgs = ChannelUtil.splitLongSmsMessage(entity, msg);
+				List<T> msgs = LongMessageFrameHolder.INS.splitLongSmsMessage(entity, msg);
 				
 				return synwrite(msgs);
 			}
@@ -92,6 +94,17 @@ class InnerSmsClient {
 		}
 	}
 
+	public Promise<BaseMessage> asyncsend(BaseMessage msg) throws Exception {
+		if (connected) {
+			connector.asynwriteUncheck(msg);
+			DefaultPromise p = new DefaultPromise<BaseMessage>(GlobalEventExecutor.INSTANCE);
+			p.trySuccess(msg);
+			 return p;
+		} else {
+			throw new IOException("connection usable.");
+		}
+	}
+	
 	public Promise<BaseMessage> send(BaseMessage msg) throws Exception {
 		if (connected) {
 			List<Promise<BaseMessage>> promises = syncWriteLongMsgToEntity(msg);

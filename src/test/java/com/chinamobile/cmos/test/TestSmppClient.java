@@ -13,6 +13,7 @@ import com.chinamobile.cmos.SmsClient;
 import com.chinamobile.cmos.SmsClientBuilder;
 import com.zx.sms.BaseMessage;
 import com.zx.sms.codec.smpp.Address;
+import com.zx.sms.codec.smpp.SmppSplitType;
 import com.zx.sms.codec.smpp.msg.SubmitSm;
 import com.zx.sms.connect.manager.EndpointEntity.ChannelType;
 import com.zx.sms.connect.manager.smpp.SMPPClientEndpointEntity;
@@ -30,8 +31,9 @@ public class TestSmppClient {
 		client.setSystemId("test01");
 		client.setPassword("1qaz2wsx");
 		client.setChannelType(ChannelType.DUPLEX);
-
+		client.setInterfaceVersion((byte)0x34);
 		client.setMaxChannels((short)10);
+		client.setSplitType(SmppSplitType.PAYLOADPARAM);
 		client.setRetryWaitTimeSec((short)100);
 		client.setUseSSL(false);
 		client.setReSendFailMsg(false);
@@ -45,7 +47,7 @@ public class TestSmppClient {
 				
 			}}).build();
 		Future future = null;
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < 50; i++) {
 			 future = executor.submit(new Runnable() {
 
 				public void run() {
@@ -54,9 +56,9 @@ public class TestSmppClient {
 			        pdu.setSourceAddress(new Address((byte)0,(byte)0,"10086"));
 			        pdu.setDestAddress(new Address((byte)0,(byte)0,"13800138000"));
 //			        pdu.setSmsMsg(new SmsTextMessage(content,SmsDcs.getGeneralDataCodingDcs(SmsAlphabet.GSM,SmsMsgClass.CLASS_UNKNOWN)));
-			        pdu.setSmsMsg("SmsTextMessage");
+			        pdu.setSmsMsg("SmsTex2、自动化巡检情况：2022年12月31日8:00至2023年01月01日8:00，自动化巡检渠道5个，统计周期内累计运行用例11174个，出现失败用例919个，失败用例复测通过919个，业务正常；tMessage");
 					try {
-						smsClient.send(pdu, 1000);
+						smsClient.asyncSendJustInChannel(pdu);
 					} catch (Exception e) {
 						logger.info("send ", e);
 					}

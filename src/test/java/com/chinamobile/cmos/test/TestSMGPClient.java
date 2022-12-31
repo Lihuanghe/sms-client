@@ -46,7 +46,7 @@ public class TestSMGPClient {
 				
 			}}).build();
 		Future future = null;
-		for (int i = 0; i < 50; i++) {
+		for (int i = 0; i < 500; i++) {
 			 future = executor.submit(new Runnable() {
 
 				public void run() {

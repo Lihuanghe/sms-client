@@ -5,7 +5,7 @@
 	<groupId>com.chinamobile.cmos</groupId>
 	<artifactId>sms-client</artifactId>
 	<packaging>jar</packaging>
-	<version>0.0.8</version>
+	<version>0.0.8-SNAPSHOT</version>
 	<name>sms-client</name>
 	<url>http://maven.apache.org</url>
 	<properties>
@@ -55,7 +55,7 @@
 		<dependency>
 			<groupId>com.chinamobile.cmos</groupId>
 			<artifactId>sms-core</artifactId>
-			<version>2.1.13.4</version>
+			<version>2.1.13.5-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>

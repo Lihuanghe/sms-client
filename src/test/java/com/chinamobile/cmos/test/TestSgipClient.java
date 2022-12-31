@@ -44,7 +44,7 @@ public class TestSgipClient {
 				logger.info(message.toString());
 			}}).build();
 		Future future = null;
-		for (int i = 0; i < 50000; i++) {
+		for (int i = 0; i < 5000; i++) {
 			 future = executor.submit(new Runnable() {
 
 				public void run() {

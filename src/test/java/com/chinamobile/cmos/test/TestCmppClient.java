@@ -6,14 +6,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.junit.Test;
-import org.marre.sms.SmsDcs;
-import org.marre.sms.SmsTextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.chinamobile.cmos.MessageReceiver;
 import com.chinamobile.cmos.SmsClient;
 import com.chinamobile.cmos.SmsClientBuilder;
+import com.chinamobile.cmos.sms.SmsDcs;
+import com.chinamobile.cmos.sms.SmsTextMessage;
 import com.zx.sms.BaseMessage;
 import com.zx.sms.codec.cmpp.msg.CmppSubmitRequestMessage;
 
@@ -38,7 +38,7 @@ public class TestCmppClient {
 		Future future = null;
 		smsClient.open();
 		Thread.sleep(3000);
-		for (int i = 0; i <100000; i++) {
+		for (int i = 0; i <1000; i++) {
 			 future = executor.submit(new Runnable() {
 
 				public void run() {
