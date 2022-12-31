@@ -45,7 +45,12 @@
 		<appender-ref ref="SIFT" />
 	</logger>
 
-	<logger name="com.zx.sms" additivity="false">
+	<logger name="com.chinamobile.cmos" additivity="false">
+		<level value="info" />
+		<appender-ref ref="STDOUT" />
+		<appender-ref ref="DEFAULT" />
+	</logger>
+	<logger name="com.zx" additivity="false">
 		<level value="info" />
 		<appender-ref ref="STDOUT" />
 		<appender-ref ref="DEFAULT" />

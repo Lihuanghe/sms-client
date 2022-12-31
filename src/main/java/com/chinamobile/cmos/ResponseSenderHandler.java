@@ -45,13 +45,17 @@ class ResponseSenderHandler extends AbstractBusinessHandler {
 			ctx.channel().writeAndFlush(resp);
 		} else if (msg instanceof SgipDeliverRequestMessage) {
 			SgipDeliverRequestMessage req = (SgipDeliverRequestMessage) msg;
-			SgipDeliverResponseMessage resp = new SgipDeliverResponseMessage(req.getHeader());
+			SgipDeliverResponseMessage resp = new SgipDeliverResponseMessage();
+			resp.setSequenceNo(req.getHeader().getSequenceId());
+			resp.getHeader().setNodeId(req.getHeader().getNodeId());
 			resp.setResult((short) 0);
 			resp.setTimestamp(req.getTimestamp());
 			ctx.channel().writeAndFlush(resp);
 		}else if(msg instanceof SgipReportRequestMessage) {
 			SgipReportRequestMessage report = (SgipReportRequestMessage)msg;
-			SgipReportResponseMessage res = new SgipReportResponseMessage(report.getHeader());
+			SgipReportResponseMessage res = new SgipReportResponseMessage();
+			res.setSequenceNo(report.getHeader().getSequenceId());
+			res.getHeader().setNodeId(report.getHeader().getNodeId());
 			res.setTimestamp(report.getTimestamp());
 			ctx.channel().writeAndFlush(res);
 		}else if (msg instanceof DeliverSm) {

@@ -7,13 +7,14 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 
 import com.zx.sms.BaseMessage;
+import com.zx.sms.connect.manager.EndpointEntity;
 
 import io.netty.util.concurrent.Promise;
 
 public class SmsClient {
 
 	private GenericObjectPool<InnerSmsClient> pool;
-
+	
 	SmsClient(GenericObjectPool<InnerSmsClient> pool) {
 		this.pool = pool;
 	}
@@ -89,4 +90,9 @@ public class SmsClient {
 	public void close() throws Exception {
 		pool.close();
 	}
+
+	public EndpointEntity getEntity() {
+		return  ((InnerBasePooledObjectFactory)pool.getFactory()).getEntity();
+	}
+	
 }

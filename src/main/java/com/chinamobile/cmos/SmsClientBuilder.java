@@ -2,35 +2,20 @@ package com.chinamobile.cmos;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.pool2.BasePooledObjectFactory;
-import org.apache.commons.pool2.PooledObject;
-import org.apache.commons.pool2.impl.DefaultPooledObject;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cedarsoftware.util.ReflectionUtils;
 import com.chinamobile.cmos.protocol.ProtocolProcessor;
 import com.chinamobile.cmos.protocol.ProtocolProcessorFactory;
-import com.google.common.reflect.Reflection;
-import com.zx.sms.BaseMessage;
 import com.zx.sms.connect.manager.EndpointEntity;
 import com.zx.sms.connect.manager.EndpointEntity.ChannelType;
-import com.zx.sms.connect.manager.cmpp.CMPPClientEndpointEntity;
-import com.zx.sms.connect.manager.sgip.SgipClientEndpointEntity;
-import com.zx.sms.connect.manager.smgp.SMGPClientEndpointEntity;
-import com.zx.sms.connect.manager.smpp.SMPPClientEndpointEntity;
-import com.zx.sms.handler.api.AbstractBusinessHandler;
-import com.zx.sms.handler.api.BusinessHandlerInterface;
-
-import io.netty.channel.ChannelHandlerContext;
 
 public class SmsClientBuilder {
 	private static final Logger logger = LoggerFactory.getLogger(SmsClientBuilder.class);
@@ -74,38 +59,8 @@ public class SmsClientBuilder {
 				config.setMinIdle(maxChannel); 
 			}
 		}
-			
 
-		pool = new GenericObjectPool<InnerSmsClient>(new BasePooledObjectFactory<InnerSmsClient>() {
-
-			@Override
-			public InnerSmsClient create() throws Exception {
-				EndpointEntity innerEntity = buildEndpointEntity();
-
-				InnerSmsClient innerSmsClient = new InnerSmsClient(innerEntity,window);
-				return innerSmsClient;
-			}
-
-			@Override
-			public PooledObject<InnerSmsClient> wrap(InnerSmsClient obj) {
-				return new DefaultPooledObject<InnerSmsClient>(obj);
-			}
-
-			public void activateObject(PooledObject<InnerSmsClient> p) throws Exception {
-				InnerSmsClient innerSmsClient = p.getObject();
-				innerSmsClient.open();
-			}
-
-			public boolean validateObject(PooledObject<InnerSmsClient> p) {
-				InnerSmsClient innerSmsClient = p.getObject();
-				return innerSmsClient.isConnected();
-			}
-
-			public void destroyObject(PooledObject<InnerSmsClient> p) throws Exception {
-				InnerSmsClient innerSmsClient = p.getObject();
-				innerSmsClient.close();
-			}
-		}, config);
+		pool = new GenericObjectPool<InnerSmsClient>(new InnerBasePooledObjectFactory(this.entity, receiver) , config);
 		hasBuild = true;
 		client = new SmsClient(pool);
 		return client;
@@ -167,8 +122,6 @@ public class SmsClientBuilder {
 		e.setMaxChannels((short) maxc.shortValue());
 		e.setProxy(proxy);
 		
-		
-		
 		return e;
 	}
 	
@@ -192,99 +145,4 @@ public class SmsClientBuilder {
 		return result;
 	}
 
-	private EndpointEntity buildEndpointEntity() {
-		EndpointEntity innerEntity = null;
-		if (entity instanceof CMPPClientEndpointEntity) {
-			innerEntity = new CMPPClientEndpointEntity() {
-				@Override
-				protected InnerCmppEndpointConnector buildConnector() {
-
-					return new InnerCmppEndpointConnector(this);
-				}
-			};
-		} else if (entity instanceof SMPPClientEndpointEntity) {
-			innerEntity = new SMPPClientEndpointEntity() {
-				@Override
-				protected InnerSMPPEndpointConnector buildConnector() {
-
-					return new InnerSMPPEndpointConnector(this);
-				}
-			};
-		} else if (entity instanceof SMGPClientEndpointEntity) {
-			innerEntity = new SMGPClientEndpointEntity() {
-				@Override
-				protected InnerSMGPEndpointConnector buildConnector() {
-
-					return new InnerSMGPEndpointConnector(this);
-				}
-			};
-		} else if (entity instanceof SgipClientEndpointEntity) {
-			innerEntity = new SgipClientEndpointEntity() {
-				@Override
-				protected InnerSgipEndpointConnector buildConnector() {
-
-					return new InnerSgipEndpointConnector(this);
-				}
-			};
-		}
-
-		try {
-
-			BeanUtils.copyProperties(innerEntity, entity);
-
-		} catch (IllegalAccessException e) {
-		} catch (InvocationTargetException e) {
-		}
-
-		innerEntity.setMaxChannels((short) 1);
-		
-		if (innerEntity.getBusinessHandlerSet() == null)
-			innerEntity.setBusinessHandlerSet(new ArrayList<BusinessHandlerInterface>());
-
-		AbstractBusinessHandler responseHandler = new AbstractBusinessHandler() {
-
-			@Override
-			public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
-				ResponseSenderHandler handler = new ResponseSenderHandler();
-				handler.setEndpointEntity(getEndpointEntity());
-				ctx.pipeline().addAfter("sessionStateManager", handler.name(), handler);
-				ctx.pipeline().remove(this);
-			}
-
-			@Override
-			public String name() {
-				return "AddResponseSenderHandler";
-			}
-		};
-		AbstractBusinessHandler receiverHandlerAdder =new AbstractBusinessHandler() {
-			@Override
-			public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
-				ctx.pipeline().addLast(new AbstractBusinessHandler() {
-
-					public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
-						try {
-							if(receiver!=null)
-								receiver.receive((BaseMessage) msg);
-						}catch(Exception e) {
-							logger.warn("{}",msg);
-						}
-					}
-
-					@Override
-					public String name() {
-						return "ReceiverHandler";
-					}
-				});
-				ctx.pipeline().remove(this);
-			}
-
-			@Override
-			public String name() {
-				return "AddReceiverHandler";
-			}
-		};
-		innerEntity.getBusinessHandlerSet().add(receiverHandlerAdder);
-		innerEntity.getBusinessHandlerSet().add(responseHandler);
-		return innerEntity;
-	}
 }
