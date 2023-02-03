@@ -135,7 +135,7 @@ class InnerBasePooledObjectFactory extends BasePooledObjectFactory<InnerSmsClien
 								if(receiver!=null)
 									receiver.receive((BaseMessage) msg);
 							}catch(Exception e) {
-								logger.warn("{}",msg);
+								logger.warn("Exception : receiver {}",msg.toString(),e);
 							}
 						}
 
