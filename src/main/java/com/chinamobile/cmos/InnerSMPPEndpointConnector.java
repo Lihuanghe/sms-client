@@ -50,7 +50,6 @@ class InnerSMPPEndpointConnector extends SMPPClientEndpointConnector   implement
 				
 				if(!loginResponseFuture.isDone())
 					loginResponseFuture.tryFailure(new IOException("login Failed.") );
-				atomicReference.set(null);
 				super.channelInactive(ctx);
 			}
 			protected  int validServermsg(Object message) {
@@ -74,6 +73,11 @@ class InnerSMPPEndpointConnector extends SMPPClientEndpointConnector   implement
 	}
 
 	public AbstractSessionStateManager session() {
-		return atomicReference.get();
+		AbstractSessionStateManager session =  atomicReference.get();
+		if(session != null  && !session.getCtx().channel().isActive()) {
+			atomicReference.set(null);
+			return null;
+		}
+		return session;
 	}
 }

@@ -49,7 +49,6 @@ class InnerSgipEndpointConnector extends SgipClientEndpointConnector   implement
 			public void channelInactive(ChannelHandlerContext ctx) throws Exception{
 				if(!loginResponseFuture.isDone())
 					loginResponseFuture.tryFailure(new IOException("login Failed.") );
-				atomicReference.set(null);
 				super.channelInactive(ctx);
 			}
 			protected  int validServermsg(Object message) {
@@ -73,6 +72,11 @@ class InnerSgipEndpointConnector extends SgipClientEndpointConnector   implement
 	}
 
 	public AbstractSessionStateManager session() {
-		return atomicReference.get();
+		AbstractSessionStateManager session =  atomicReference.get();
+		if(session != null  && !session.getCtx().channel().isActive()) {
+			atomicReference.set(null);
+			return null;
+		}
+		return session;
 	}
 }
