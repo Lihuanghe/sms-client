@@ -91,8 +91,15 @@
 
 ```
 
-# TODO
+# SGIP回收状态报告和用户回复
 
+- `为什么smsClient不提供sgip协议的接收上行消息、状态报告能力`
+
+  smsClient是一个tcp客户端，它需要主动去连接服务端的tcp端口。而sgip协议要求接收上行回复短信时，SP要启动一个tcp服务，等待来自运营商短信网关的连接请求（此时运营商是tcp客户端）。
+一般系统部署时，作为客户端可能会部署多个进程节点，类似HTTP请求，可以从多个节点分别发起请求。
+
+  但sgip的上行短信接收服务作为一个tcp服务端只能有一个，集成在client端很别扭。 替代方式为：根据系统架构特点，设计接收上行消息的tcp服务如何部署，比如可以独立一个节点，也可以与Http的web服务一起部署。
+SgipServer的开发方式可以参考[smsServer](https://github.com/Lihuanghe/smsServer) 。
 
 
 
