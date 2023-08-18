@@ -18,6 +18,10 @@
 </dependency>
 ```
 
+- `如何创建smsClient对象`
+	
+  通过builder模式，为同一个账号创建唯一一个实例对象，不能重复创建。 smsClient对象创建后会自行管理多个tcp连接，如果重复创建Client对象，就会造成总连接数超过最大值。
+
 - `如何发送短信？`
 
   参考test包里的测试用例 ：
@@ -25,6 +29,7 @@
 ```java
 		String uri = "cmpp://127.0.0.1:17890?username=test01&password=1qaz2wsx&version=32&spcode=10086&msgsrc=test01&serviceid=000000&window=32&maxchannel=1";
 
+		//通过builder创建一个Client对象，同一个通道账号只用保持一个smsClient实例。可以使用Spring注册为单例Bean。或者单例模式
 		SmsClientBuilder builder = new SmsClientBuilder();
 //		EndpointEntity client =  builder.createEndpointEntity(uri);
 		final SmsClient smsClient = builder.uri(uri) // 保持空闲连接，以便能接收上行或者状态报告消息
@@ -33,6 +38,8 @@
 //						System.out.println(message.toString());
 					}
 				}).build();
+				
+		
 		Future future = null;
 		
 		//发送5000条短信
