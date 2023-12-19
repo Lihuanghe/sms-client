@@ -5,7 +5,7 @@
 	<groupId>com.chinamobile.cmos</groupId>
 	<artifactId>sms-client</artifactId>
 	<packaging>jar</packaging>
-	<version>0.0.9</version>
+	<version>0.1</version>
 	<name>sms-client</name>
 	<url>http://maven.apache.org</url>
 	<properties>

@@ -14,8 +14,7 @@ import com.zx.sms.connect.manager.AbstractClientEndpointConnector;
 import com.zx.sms.connect.manager.EndpointEntity;
 import com.zx.sms.session.AbstractSessionStateManager;
 
-import io.netty.util.concurrent.DefaultPromise;
-import io.netty.util.concurrent.GlobalEventExecutor;
+import io.netty.channel.ChannelFuture;
 import io.netty.util.concurrent.Promise;
 
 class InnerSmsClient {
@@ -85,23 +84,21 @@ class InnerSmsClient {
 		if (connected) {
 			List<Promise<T>> promises =  synwrite(msgs);
 			if (promises == null) {
-				throw new IOException("connection usable.");
+				throw new IOException("connection unusable.");
 			}
 			Promise<T> promise = promises.get(promises.size() - 1);
 			return promise;
 		} else {
-			throw new IOException("connection usable.");
+			throw new IOException("connection unusable.");
 		}
 	}
 
-	public Promise<BaseMessage> asyncsend(BaseMessage msg) throws Exception {
+	public void asyncsend(BaseMessage msg) throws Exception {
 		if (connected) {
-			connector.asynwriteUncheck(msg);
-			DefaultPromise p = new DefaultPromise<BaseMessage>(GlobalEventExecutor.INSTANCE);
-			p.trySuccess(msg);
-			 return p;
+			ChannelFuture future = connector.asynwriteUncheck(msg);
+			future.get();
 		} else {
-			throw new IOException("connection usable.");
+			throw new IOException("connection unusable.");
 		}
 	}
 	
@@ -109,12 +106,12 @@ class InnerSmsClient {
 		if (connected) {
 			List<Promise<BaseMessage>> promises = syncWriteLongMsgToEntity(msg);
 			if (promises == null) {
-				throw new IOException("connection usable.");
+				throw new IOException("connection unusable.");
 			}
 			Promise<BaseMessage> promise = promises.get(promises.size() - 1);
 			return promise;
 		} else {
-			throw new IOException("connection usable.");
+			throw new IOException("connection unusable.");
 		}
 	}
 	
@@ -122,11 +119,11 @@ class InnerSmsClient {
 		if (connected) {
 			List<Promise<BaseMessage>> promises = syncWriteLongMsgToEntity(msg);
 			if (promises == null) {
-				throw new IOException("connection usable.");
+				throw new IOException("connection unusable.");
 			}
 			return promises;
 		} else {
-			throw new IOException("connection usable.");
+			throw new IOException("connection unusable.");
 		}
 	}
 
@@ -154,7 +151,7 @@ class InnerSmsClient {
 		connected = ((LoginResponseWaiter) connector).session() != null;
 		return connected;
 	}
-
+	
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();

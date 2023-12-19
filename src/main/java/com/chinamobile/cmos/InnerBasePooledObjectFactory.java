@@ -2,6 +2,7 @@ package com.chinamobile.cmos;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.pool2.BasePooledObjectFactory;
@@ -24,17 +25,18 @@ import io.netty.channel.ChannelHandlerContext;
 class InnerBasePooledObjectFactory extends BasePooledObjectFactory<InnerSmsClient> {
 	private static final Logger logger = LoggerFactory.getLogger(InnerBasePooledObjectFactory.class);
 	
+	private EndpointEntity innerEntity;
 	private EndpointEntity entity;
 	private final MessageReceiver receiver;
 	
 	InnerBasePooledObjectFactory(EndpointEntity entity ,  MessageReceiver receiver){
 		this.entity = entity;
 		this.receiver = receiver;
+		this.innerEntity = buildEndpointEntity();
 	}
 	@Override
 	public InnerSmsClient create() throws Exception {
-		EndpointEntity tempEntity = buildEndpointEntity();
-		InnerSmsClient innerSmsClient = new InnerSmsClient(tempEntity,tempEntity.getWindow());
+		InnerSmsClient innerSmsClient = new InnerSmsClient(innerEntity,innerEntity.getWindow());
 		return innerSmsClient;
 	}
 
@@ -103,9 +105,15 @@ class InnerBasePooledObjectFactory extends BasePooledObjectFactory<InnerSmsClien
 		}
 
 		innerEntity.setMaxChannels((short) 1);
-		
-		if (innerEntity.getBusinessHandlerSet() == null)
+		List<BusinessHandlerInterface> originHandlers = null;
+		if (innerEntity.getBusinessHandlerSet() == null) {
 			innerEntity.setBusinessHandlerSet(new ArrayList<BusinessHandlerInterface>());
+		}else {
+			//如果设置有业务的定制handler。要复制出来添加到innerEntity里
+			originHandlers = innerEntity.getBusinessHandlerSet();
+			innerEntity.setBusinessHandlerSet(new ArrayList<BusinessHandlerInterface>());
+			innerEntity.getBusinessHandlerSet().addAll(originHandlers);
+		}
 
 		AbstractBusinessHandler responseHandler = new AbstractBusinessHandler() {
 
