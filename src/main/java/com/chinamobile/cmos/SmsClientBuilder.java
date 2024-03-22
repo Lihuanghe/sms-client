@@ -1,7 +1,9 @@
 package com.chinamobile.cmos;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -101,7 +103,8 @@ public class SmsClientBuilder {
 	public EndpointEntity createEndpointEntity(String str_uri) throws ClassNotFoundException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		URI uri = URI.create(str_uri);
 		String protocol = uri.getScheme();
-		Map<String, String> queryMap = queryToMap(uri.getQuery());
+
+		Map<String, String> queryMap = queryToMap(uri.getRawQuery());
 		ProtocolProcessor p = ProtocolProcessorFactory.build(protocol);
 		
 		EndpointEntity e = p.buildClient(queryMap);
@@ -136,7 +139,12 @@ public class SmsClientBuilder {
 					continue;
 				String[] kv = pairs.split("=");
 				if (kv.length > 1) {
-					result.put(kv[0], kv[1]);
+					try {
+						result.put(kv[0], URLDecoder.decode(kv[1],"UTF-8"));
+					} catch (UnsupportedEncodingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				} else {
 					result.put(kv[0], "");
 				}
