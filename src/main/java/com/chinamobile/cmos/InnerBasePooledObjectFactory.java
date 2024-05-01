@@ -32,11 +32,12 @@ class InnerBasePooledObjectFactory extends BasePooledObjectFactory<InnerSmsClien
 	InnerBasePooledObjectFactory(EndpointEntity entity ,  MessageReceiver receiver){
 		this.entity = entity;
 		this.receiver = receiver;
-		this.innerEntity = buildEndpointEntity();
+//		this.innerEntity = buildEndpointEntity();
 	}
 	@Override
 	public InnerSmsClient create() throws Exception {
-		InnerSmsClient innerSmsClient = new InnerSmsClient(innerEntity,innerEntity.getWindow());
+		EndpointEntity tempEntity = buildEndpointEntity();
+		InnerSmsClient innerSmsClient = new InnerSmsClient(tempEntity,tempEntity.getWindow());
 		return innerSmsClient;
 	}
 

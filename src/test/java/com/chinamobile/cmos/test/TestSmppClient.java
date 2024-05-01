@@ -1,5 +1,6 @@
 package com.chinamobile.cmos.test;
 
+import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -17,6 +18,8 @@ import com.zx.sms.codec.smpp.SmppSplitType;
 import com.zx.sms.codec.smpp.msg.SubmitSm;
 import com.zx.sms.connect.manager.EndpointEntity.ChannelType;
 import com.zx.sms.connect.manager.smpp.SMPPClientEndpointEntity;
+import com.zx.sms.handler.api.AbstractBusinessHandler;
+import com.zx.sms.handler.api.BusinessHandlerInterface;
 
 public class TestSmppClient {
 	private static final Logger logger = LoggerFactory.getLogger(TestSmppClient.class);
@@ -33,10 +36,19 @@ public class TestSmppClient {
 		client.setChannelType(ChannelType.DUPLEX);
 		client.setInterfaceVersion((byte)0x34);
 		client.setMaxChannels((short)10);
-		client.setSplitType(SmppSplitType.PAYLOADPARAM);
+		client.setSplitType(SmppSplitType.UDH);
 		client.setRetryWaitTimeSec((short)100);
 		client.setUseSSL(false);
 		client.setReSendFailMsg(false);
+		
+		
+		client.setBusinessHandlerSet(new ArrayList<BusinessHandlerInterface>());
+		client.getBusinessHandlerSet().add(new AbstractBusinessHandler() {
+			public  String name() {
+				return "Test123";
+			}
+			
+		});
 //		client.setWriteLimit(20);
 //		client.setReadLimit(200);
 		SmsClientBuilder builder = new SmsClientBuilder();
@@ -47,7 +59,7 @@ public class TestSmppClient {
 				
 			}}).build();
 		Future future = null;
-		for (int i = 0; i < 50; i++) {
+		for (int i = 0; i < 500; i++) {
 			 future = executor.submit(new Runnable() {
 
 				public void run() {
@@ -56,7 +68,7 @@ public class TestSmppClient {
 			        pdu.setSourceAddress(new Address((byte)0,(byte)0,"10086"));
 			        pdu.setDestAddress(new Address((byte)0,(byte)0,"13800138000"));
 //			        pdu.setSmsMsg(new SmsTextMessage(content,SmsDcs.getGeneralDataCodingDcs(SmsAlphabet.GSM,SmsMsgClass.CLASS_UNKNOWN)));
-			        pdu.setSmsMsg("SmsTex2、自动化巡检情况：2022年12月31日8:00至2023年01月01日8:00，自动化巡检渠道5个，统计周期内累计运行用例11174个，出现失败用例919个，失败用例复测通过919个，业务正常；tMessage");
+			        pdu.setSmsMsg("SmsTex2、自动");
 					try {
 						smsClient.asyncSendJustInChannel(pdu);
 					} catch (Exception e) {
