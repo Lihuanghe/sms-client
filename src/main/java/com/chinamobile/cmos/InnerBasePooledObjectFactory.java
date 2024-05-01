@@ -25,14 +25,12 @@ import io.netty.channel.ChannelHandlerContext;
 class InnerBasePooledObjectFactory extends BasePooledObjectFactory<InnerSmsClient> {
 	private static final Logger logger = LoggerFactory.getLogger(InnerBasePooledObjectFactory.class);
 	
-	private EndpointEntity innerEntity;
 	private EndpointEntity entity;
 	private final MessageReceiver receiver;
 	
 	InnerBasePooledObjectFactory(EndpointEntity entity ,  MessageReceiver receiver){
 		this.entity = entity;
 		this.receiver = receiver;
-//		this.innerEntity = buildEndpointEntity();
 	}
 	@Override
 	public InnerSmsClient create() throws Exception {
