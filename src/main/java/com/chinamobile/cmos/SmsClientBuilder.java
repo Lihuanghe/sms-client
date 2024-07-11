@@ -39,15 +39,15 @@ public class SmsClientBuilder {
 			config.setSoftMinEvictableIdleTimeMillis(30000);
 			config.setMinIdle(1); //至少保留1个连接
 		}
-		
+
 		//这个配置影响断点续连 ，连接空闲超过此时间强制关闭回收连接
-		config.setMinEvictableIdleTimeMillis(-1); 
-		
+		config.setMinEvictableIdleTimeMillis(-1);
+
 		//打开个这配置，相当于开启断连检查
 		config.setTestWhileIdle(true);
 		//这个时间影响断点续连的检查时间，时长越长发现断连越晚
-		config.setTimeBetweenEvictionRunsMillis(5000);  
-		
+		config.setTimeBetweenEvictionRunsMillis(5000);
+
 		if (entity == null || StringUtils.isBlank(entity.getId()))
 			return null;
 
@@ -58,9 +58,11 @@ public class SmsClientBuilder {
 			config.setMaxIdle(maxChannel);
 			if(keepAllIdleConnection) {
 				//保留所有空闲连接
-				config.setMinIdle(maxChannel); 
+				config.setMinIdle(maxChannel);
 			}
 		}
+
+        this.entity.setWindow(this.window);
 
 		pool = new GenericObjectPool<InnerSmsClient>(new InnerBasePooledObjectFactory(this.entity, receiver) , config);
 		hasBuild = true;
@@ -78,13 +80,13 @@ public class SmsClientBuilder {
 		this.entity = entity;
 		return this;
 	}
-	
+
 	public SmsClientBuilder uri(String uri) throws Exception {
 		EndpointEntity entity = createEndpointEntity(uri);
 		this.entity = entity;
 		return this;
 	}
-	
+
 	public SmsClientBuilder keepAllIdleConnection() {
 		this.keepAllIdleConnection = true;
 		return this;
@@ -94,29 +96,29 @@ public class SmsClientBuilder {
 		this.receiver = receiver;
 		return this;
 	}
-	
+
 	public SmsClientBuilder window(int window) {
 		this.window = window;
 		return this;
 	}
-	
+
 	public EndpointEntity createEndpointEntity(String str_uri) throws ClassNotFoundException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		URI uri = URI.create(str_uri);
 		String protocol = uri.getScheme();
 
 		Map<String, String> queryMap = queryToMap(uri.getRawQuery());
 		ProtocolProcessor p = ProtocolProcessorFactory.build(protocol);
-		
+
 		EndpointEntity e = p.buildClient(queryMap);
-		
+
 		BeanUtils.copyProperties(e, queryMap);
-		
+
 		String proxy = queryMap.get("proxy");
 		String id = queryMap.get("id");
 		String maxchannel = queryMap.get("maxchannel");
 		Integer maxc = Integer.parseInt((StringUtils.isBlank(maxchannel)?"1":maxchannel));
-		
-		
+
+
 		e.setId(StringUtils.isBlank(id)?"client":id);
 		e.setHost(uri.getHost());
 		e.setPort(uri.getPort());
@@ -124,10 +126,10 @@ public class SmsClientBuilder {
 		e.setChannelType(ChannelType.DUPLEX);
 		e.setMaxChannels((short) maxc.shortValue());
 		e.setProxy(proxy);
-		
+
 		return e;
 	}
-	
+
 	private static Map<String, String> queryToMap(String query) {
 		if (StringUtils.isBlank(query))
 			return null;
