@@ -26,7 +26,7 @@ class ResponseSenderHandler extends AbstractBusinessHandler {
 
 	@Override
 	public String name() {
-		return "ResponseSenderHandler";
+		return "__preRandom924__ResponseSenderHandler";
 	}
 	
 	private void response(ChannelHandlerContext ctx, Object msg) {

@@ -126,7 +126,7 @@ class InnerBasePooledObjectFactory extends BasePooledObjectFactory<InnerSmsClien
 
 			@Override
 			public String name() {
-				return "AddResponseSenderHandler";
+				return "__preRandom924__AddResponseSenderHandler";
 			}
 		};
 		innerEntity.getBusinessHandlerSet().add(responseHandler);
@@ -148,7 +148,7 @@ class InnerBasePooledObjectFactory extends BasePooledObjectFactory<InnerSmsClien
 
 						@Override
 						public String name() {
-							return "ReceiverHandler";
+							return "__preRandom924__ReceiverHandler";
 						}
 					});
 					ctx.pipeline().remove(this);
@@ -156,7 +156,7 @@ class InnerBasePooledObjectFactory extends BasePooledObjectFactory<InnerSmsClien
 
 				@Override
 				public String name() {
-					return "AddReceiverHandler";
+					return "__preRandom924__AddReceiverHandler";
 				}
 			};
 			innerEntity.getBusinessHandlerSet().add(receiverHandlerAdder);
