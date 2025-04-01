@@ -39,7 +39,8 @@ public class SmsClientBuilder {
 			config.setSoftMinEvictableIdleTimeMillis(30000);
 			config.setMinIdle(1); //至少保留1个连接
 		}
-		
+		//设置为先进先出，让每个连接均匀使用，避免频繁用一个连接
+		config.setLifo(false);
 		//这个配置影响断点续连 ，连接空闲超过此时间强制关闭回收连接
 		config.setMinEvictableIdleTimeMillis(-1); 
 		
